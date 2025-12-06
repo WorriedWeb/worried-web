@@ -46,10 +46,12 @@ connectDB().then(async () => {
     }
   }
 });
+const allowedOrigins = ['http://localhost:5173', 'https://worriedweb-frontend.vercel.app']
+
 
 // Middleware
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+app.use(cors({origin: allowedOrigins, credentials: true}));
 app.use(express.json({ limit: '50mb' })); 
 
 // Rate Limiting
