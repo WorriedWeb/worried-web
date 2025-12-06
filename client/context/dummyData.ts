@@ -51,7 +51,7 @@ export const DUMMY_SERVICES: Service[] = [
 export const DUMMY_PROJECTS: Project[] = [
   {
     id: '1',
-    title: 'LuxeHomes Realty',
+    title: 'Myhome Realty',
     slug: 'luxehomes-realty',
     description: 'A premium real estate platform featuring virtual tours, advanced property filtering, and an integrated CRM for agents. We reduced page load times by 40% and increased lead generation by 25%.',
     imageUrl: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80',
