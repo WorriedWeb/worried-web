@@ -22,6 +22,8 @@ import { Toaster } from 'react-hot-toast';
 import ScrollToTop from './components/ScrollToTop';
 import { OfferNotification } from './components/OfferNotification';
 
+// Using this to test the auto redeployment feature
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
