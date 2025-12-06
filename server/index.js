@@ -67,6 +67,9 @@ app.use('/api/content', contentRoutes);
 app.use('/api/upload', uploadRoutes); 
 
 // Blog Routes
+app.get('/', (req, res) => {
+  res.send('Worried Web API is running');
+})
 app.get('/api/blog', async (req, res) => {
   try {
     const posts = await BlogPost.find().sort('-publishedAt');
