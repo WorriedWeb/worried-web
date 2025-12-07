@@ -73,11 +73,18 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // Helper to construct API URL safely
 const getBaseUrl = () => {
-  // Safe access to import.meta.env for environments where it might be undefined
-  const env = (import.meta as any).env || {};
+  let url = 'https://worriedweb-backend.vercel.app/api';
   
-  // Default to the production backend if env var is missing
-  let url = env.VITE_BACKEND_URL || 'https://worriedweb-backend.vercel.app/api';
+  try {
+    // Robust check for import.meta.env
+    // Use type assertion to avoid TS errors if types aren't configured
+    const meta = import.meta as any;
+    if (meta && meta.env && meta.env.VITE_BACKEND_URL) {
+      url = meta.env.VITE_BACKEND_URL;
+    }
+  } catch (error) {
+    // Ignore error if import.meta is not defined in current environment
+  }
   
   // Remove trailing slash to normalize
   if (url.endsWith('/')) {
