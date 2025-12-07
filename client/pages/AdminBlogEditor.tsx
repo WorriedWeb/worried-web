@@ -1,12 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useData } from '../context/DataContext';
+import { useData, api } from '../context/DataContext';
 import { BlogPost } from '../types';
 import { RichTextEditor } from '../components/RichTextEditor';
 import { ArrowLeft, Save, Image as ImageIcon, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 
 export const AdminBlogEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,11 +39,9 @@ export const AdminBlogEditor: React.FC = () => {
     const toastId = toast.loading('Uploading image...');
 
     try {
-      const token = localStorage.getItem('admin_token');
-      const res = await axios.post('/api/upload', formDataUpload, {
+      const res = await api.post('/upload', formDataUpload, {
           headers: { 
               'Content-Type': 'multipart/form-data',
-              'Authorization': `Bearer ${token}`
           }
       });
       const url = res.data.url;

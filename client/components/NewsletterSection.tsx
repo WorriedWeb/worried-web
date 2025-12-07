@@ -13,25 +13,24 @@ export const NewsletterSection: React.FC = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const { addSubscriber } = useData();
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
       toast.error('Please enter a valid email');
       return;
     }
     
-    // Simulate API call
+    // Real API call
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      addSubscriber(email),
       {
         loading: 'Subscribing...',
         success: () => {
-          addSubscriber(email);
           setIsSubscribed(true);
           setEmail('');
           return 'Subscribed successfully!';
         },
-        error: 'Could not subscribe.',
+        error: 'Could not subscribe. Please try again.',
       }
     );
   };

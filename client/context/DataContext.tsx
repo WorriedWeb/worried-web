@@ -31,7 +31,7 @@ interface DataContextType {
   updateProject: (id: string, project: Project) => Promise<void>;
   deleteProject: (id: string) => void;
   
-  addMessage: (message: ContactMessage) => void;
+  addMessage: (message: ContactMessage) => Promise<void>;
   updateMessageStatus: (id: string, status: 'new' | 'read' | 'resolved') => void;
   deleteMessage: (id: string) => void;
 
@@ -51,7 +51,7 @@ interface DataContextType {
   updateFAQ: (id: string, faq: FAQ) => void;
   deleteFAQ: (id: string) => void;
 
-  addLead: (lead: Lead) => void;
+  addLead: (lead: Lead) => Promise<void>;
   updateLead: (id: string, lead: Lead) => void;
   deleteLead: (id: string) => void;
 
@@ -59,7 +59,7 @@ interface DataContextType {
   updateOffer: (id: string, offer: Offer) => void;
   deleteOffer: (id: string) => void;
 
-  addSubscriber: (email: string) => void;
+  addSubscriber: (email: string) => Promise<void>;
   deleteSubscriber: (id: string) => void;
 
   addBlogPost: (post: Partial<BlogPost>) => Promise<BlogPost>;
@@ -73,8 +73,11 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // Helper to construct API URL safely
 const getBaseUrl = () => {
+  // Safe access to import.meta.env for environments where it might be undefined
+  const env = (import.meta as any).env || {};
+  
   // Default to the production backend if env var is missing
-  let url = (import.meta as any).env.VITE_BACKEND_URL || 'https://worriedweb-backend.vercel.app/api';
+  let url = env.VITE_BACKEND_URL || 'https://worriedweb-backend.vercel.app/api';
   
   // Remove trailing slash to normalize
   if (url.endsWith('/')) {
@@ -89,8 +92,8 @@ const getBaseUrl = () => {
   return url;
 };
 
-// Axios instance with interceptor
-const api = axios.create({ 
+// Axios instance with interceptor - Exported for use in other files
+export const api = axios.create({ 
   baseURL: getBaseUrl() 
 });
 
@@ -351,7 +354,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addMessage = async (m: ContactMessage) => {
     try {
         const res = await api.post('/contact', m);
-    } catch (e) { console.error(e) }
+        // Optimistically add locally or refetch? For now just log success
+    } catch (e) { 
+      console.error(e);
+      throw e; // Propagate error for UI handling
+    }
   };
   const updateMessageStatus = async (id: string, status: 'new' | 'read' | 'resolved') => {
     try {
@@ -370,7 +377,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
         const res = await api.post('/lead', l);
         setLeads([mapId(res.data), ...leads]);
-    } catch(e) { console.error(e) }
+    } catch(e) { 
+      console.error(e);
+      throw e; // Propagate error
+    }
   };
   const updateLead = async (id: string, l: Lead) => {
     try {
@@ -388,7 +398,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addSubscriber = async (email: string) => {
     try {
       await api.post('/subscriber', { email });
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e); 
+      throw e;
+    }
   };
   const deleteSubscriber = async (id: string) => {
     try {

@@ -4,10 +4,9 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { ServiceInterest } from '../types';
 import toast from 'react-hot-toast';
 import { Mail, Phone, MapPin, Loader2, ChevronDown, ChevronUp, CheckCircle } from 'lucide-react';
-import { useData } from '../context/DataContext';
+import { useData, api } from '../context/DataContext.tsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/Button';
-import axios from 'axios';
 
 // Interface matching the backend
 interface ContactFormInputs {
@@ -33,7 +32,7 @@ export const Contact: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      await axios.post('/api/contact', data);
+      await api.post('/contact', data);
       setIsSuccess(true);
       toast.success("Message sent! We'll be in touch shortly.");
       reset();

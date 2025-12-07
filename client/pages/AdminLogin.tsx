@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../context/DataContext';
 import { Shield, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 
 export const AdminLogin: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -30,7 +31,7 @@ export const AdminLogin: React.FC = () => {
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
-      const res = await axios.post('/api/auth/login', {
+      const res = await api.post('/auth/login', {
         email: data.email,
         password: data.password
       });
