@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Home } from './pages/Home';
@@ -14,6 +14,7 @@ import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminBlogEditor } from './pages/AdminBlogEditor';
 import { AdminProjectEditor } from './pages/AdminProjectEditor';
+import { NotFound } from './pages/NotFound';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
@@ -21,8 +22,6 @@ import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import ScrollToTop from './components/ScrollToTop';
 import { OfferNotification } from './components/OfferNotification';
-
-// Using this to test the auto redeployment feature
 
 const App: React.FC = () => {
   return (
@@ -97,8 +96,8 @@ const App: React.FC = () => {
                   {/* Redirect /admin to /admin/dashboard */}
                   <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                   
-                  {/* Fallback Route - unknown route goes to Home */}
-                  <Route path="*" element={<Home />} />
+                  {/* Fallback Route - unknown route goes to NotFound */}
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
               <Footer />
