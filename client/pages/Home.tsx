@@ -59,7 +59,7 @@ const animations = (shouldReduceMotion: boolean) => ({
     }
   }
 });
-
+console.log(import.meta.env.VITE_BACKEND_URL);
 // --- Main Component ---
 
 export const Home: React.FC = () => {
@@ -68,6 +68,7 @@ export const Home: React.FC = () => {
   const scrollRef = useRef(null);
   const shouldReduceMotion = useReducedMotion();
   const anim = animations(Boolean(shouldReduceMotion));
+  
 
   // Parallax for Hero
   const { scrollY } = useScroll();
