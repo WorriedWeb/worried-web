@@ -73,7 +73,7 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // Axios instance with interceptor
 // Prefer VITE_BACKEND_URL if provided; fallback to relative '/api' so dev proxy works.
-const BACKEND = (typeof import.meta !== 'undefined' ? (import.meta as any).env?.VITE_BACKEND_URL : '') || '';
+const BACKEND = (typeof import.meta !== 'undefined' ? `${(import.meta as any).env?.VITE_BACKEND_URL}/api` : '') || '';
 // helpful runtime debug (remove in production if you want)
 console.log('DATA CONTEXT BACKEND =', BACKEND);
 
