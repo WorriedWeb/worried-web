@@ -1,0 +1,9 @@
+[build]
+  base = "luxeestate (5)"
+  command = "npm run build"
+  publish = "luxeestate (5)/dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
