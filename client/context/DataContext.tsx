@@ -1,5 +1,5 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import type { AxiosRequestConfig, AxiosRequestHeaders } from 'axios';
 import { Project, ContactMessage, TeamMember, Testimonial, Service, FAQ, HeroContent, Lead, Offer, Subscriber, BlogPost } from '../types';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
@@ -71,26 +71,33 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+// Helper to construct API URL safely
+const getBaseUrl = () => {
+  // Default to the production backend if env var is missing
+  let url = (import.meta as any).env.VITE_BACKEND_URL || 'https://worriedweb-backend.vercel.app/api';
+  
+  // Remove trailing slash to normalize
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+  
+  // Ensure it ends with /api
+  if (!url.endsWith('/api')) {
+    url = `${url}/api`;
+  }
+  
+  return url;
+};
+
 // Axios instance with interceptor
-// Prefer VITE_BACKEND_URL if provided; fallback to relative '/api' so dev proxy works.
-const BACKEND = (typeof import.meta !== 'undefined' ? `${(import.meta as any).env?.VITE_BACKEND_URL}/api` : '') || '';
-// helpful runtime debug (remove in production if you want)
-console.log('DATA CONTEXT BACKEND =', BACKEND);
-
-const api = axios.create({ baseURL: BACKEND || '/api' });
-
+const api = axios.create({ 
+  baseURL: getBaseUrl() 
+});
 
 api.interceptors.request.use((config) => {
-  try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
-    if (token) {
-      // keep existing headers, spread into a plain object, then cast to any for assignment
-      const existing = (config.headers ?? {}) as Record<string, unknown>;
-      const headers = { ...existing, Authorization: `Bearer ${token}` } as any;
-      config.headers = headers;
-    }
-  } catch (err) {
-    console.warn('Failed to attach token to request', err);
+  const token = localStorage.getItem('admin_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -131,14 +138,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const fetchPublicData = async () => {
       try {
         const [p, s, t, tm, f, o, b, h] = await Promise.all([
-          api.get('/projects'),
-          api.get('/content/services'),
-          api.get('/content/testimonials'),
-          api.get('/content/team'),
-          api.get('/content/faqs'),
-          api.get('/content/offers'),
+          api.get('/project'),
+          api.get('/service'),
+          api.get('/testimonial'),
+          api.get('/team'),
+          api.get('/faq'),
+          api.get('/offer'),
           api.get('/blog'),
-          api.get('/content/hero')
+          api.get('/hero')
         ]);
         
         setProjects(p.data.map(mapId));
@@ -164,15 +171,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
           const [m, l, sub] = await Promise.all([
             api.get('/contact'),
-            api.get('/leads'),
-            api.get('/subscribers')
+            api.get('/lead'),
+            api.get('/subscriber')
           ]);
           setMessages(m.data.map(mapId));
           setLeads(l.data.map(mapId));
           setSubscribers(sub.data.map(mapId));
         } catch (error) {
           console.error("Error fetching protected data:", error);
-          // For protected data, set safe defaults
           setMessages([]);
           setLeads([]);
           setSubscribers([]);
@@ -185,8 +191,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Projects
   const addProject = async (project: Project) => {
     try {
-      const res = await api.post('/projects', project);
-      setProjects(prev => [mapId(res.data), ...prev]);
+      const res = await api.post('/project', project);
+      setProjects([mapId(res.data), ...projects]);
     } catch (e) { 
       console.error(e); 
       throw e;
@@ -194,8 +200,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const updateProject = async (id: string, project: Project) => {
     try {
-      const res = await api.put(`/projects/${id}`, project);
-      setProjects(prev => prev.map(p => p.id === id ? mapId(res.data) : p));
+      const res = await api.put(`/project/${id}`, project);
+      setProjects(projects.map(p => p.id === id ? mapId(res.data) : p));
     } catch (e) { 
       console.error(e); 
       throw e;
@@ -203,110 +209,110 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
   const deleteProject = async (id: string) => {
     try {
-      await api.delete(`/projects/${id}`);
-      setProjects(prev => prev.filter(p => p.id !== id));
+      await api.delete(`/project/${id}`);
+      setProjects(projects.filter(p => p.id !== id));
     } catch (e) { console.error(e); }
   };
 
   // Content
   const addService = async (s: Service) => {
     try {
-      const res = await api.post('/content/services', s);
-      setServices(prev => [...prev, mapId(res.data)]);
+      const res = await api.post('/service', s);
+      setServices([...services, mapId(res.data)]);
     } catch (e) { console.error(e); }
   };
   const updateService = async (id: string, s: Service) => {
     try {
-      const res = await api.put(`/content/services/${id}`, s);
-      setServices(prev => prev.map(i => i.id === id ? mapId(res.data) : i));
+      const res = await api.put(`/service/${id}`, s);
+      setServices(services.map(i => i.id === id ? mapId(res.data) : i));
     } catch (e) { console.error(e); }
   };
   const deleteService = async (id: string) => {
     try {
-      await api.delete(`/content/services/${id}`);
-      setServices(prev => prev.filter(i => i.id !== id));
+      await api.delete(`/service/${id}`);
+      setServices(services.filter(i => i.id !== id));
     } catch (e) { console.error(e); }
   };
 
   const addTestimonial = async (t: Testimonial) => {
     try {
-      const res = await api.post('/content/testimonials', t);
-      setTestimonials(prev => [...prev, mapId(res.data)]);
+      const res = await api.post('/testimonial', t);
+      setTestimonials([...testimonials, mapId(res.data)]);
     } catch (e) { console.error(e); }
   };
   const updateTestimonial = async (id: string, t: Testimonial) => {
     try {
-      const res = await api.put(`/content/testimonials/${id}`, t);
-      setTestimonials(prev => prev.map(i => i.id === id ? mapId(res.data) : i));
+      const res = await api.put(`/testimonial/${id}`, t);
+      setTestimonials(testimonials.map(i => i.id === id ? mapId(res.data) : i));
     } catch (e) { console.error(e); }
   };
   const deleteTestimonial = async (id: string) => {
     try {
-      await api.delete(`/content/testimonials/${id}`);
-      setTestimonials(prev => prev.filter(i => i.id !== id));
+      await api.delete(`/testimonial/${id}`);
+      setTestimonials(testimonials.filter(i => i.id !== id));
     } catch (e) { console.error(e); }
   };
 
   const addTeamMember = async (m: TeamMember) => {
     try {
-      const res = await api.post('/content/team', m);
-      setTeamMembers(prev => [...prev, mapId(res.data)]);
+      const res = await api.post('/team', m);
+      setTeamMembers([...teamMembers, mapId(res.data)]);
     } catch (e) { console.error(e); }
   };
   const updateTeamMember = async (id: string, m: TeamMember) => {
     try {
-      const res = await api.put(`/content/team/${id}`, m);
-      setTeamMembers(prev => prev.map(i => i.id === id ? mapId(res.data) : i));
+      const res = await api.put(`/team/${id}`, m);
+      setTeamMembers(teamMembers.map(i => i.id === id ? mapId(res.data) : i));
     } catch (e) { console.error(e); }
   };
   const deleteTeamMember = async (id: string) => {
     try {
-      await api.delete(`/content/team/${id}`);
-      setTeamMembers(prev => prev.filter(i => i.id !== id));
+      await api.delete(`/team/${id}`);
+      setTeamMembers(teamMembers.filter(i => i.id !== id));
     } catch (e) { console.error(e); }
   };
 
   const addFAQ = async (f: FAQ) => {
     try {
-      const res = await api.post('/content/faqs', f);
-      setFaqs(prev => [...prev, mapId(res.data)]);
+      const res = await api.post('/faq', f);
+      setFaqs([...faqs, mapId(res.data)]);
     } catch (e) { console.error(e); }
   };
   const updateFAQ = async (id: string, f: FAQ) => {
     try {
-      const res = await api.put(`/content/faqs/${id}`, f);
-      setFaqs(prev => prev.map(i => i.id === id ? mapId(res.data) : i));
+      const res = await api.put(`/faq/${id}`, f);
+      setFaqs(faqs.map(i => i.id === id ? mapId(res.data) : i));
     } catch (e) { console.error(e); }
   };
   const deleteFAQ = async (id: string) => {
     try {
-      await api.delete(`/content/faqs/${id}`);
-      setFaqs(prev => prev.filter(i => i.id !== id));
+      await api.delete(`/faq/${id}`);
+      setFaqs(faqs.filter(i => i.id !== id));
     } catch (e) { console.error(e); }
   };
 
   const addOffer = async (o: Offer) => {
     try {
-      const res = await api.post('/content/offers', o);
-      setOffers(prev => [...prev, mapId(res.data)]);
+      const res = await api.post('/offer', o);
+      setOffers([...offers, mapId(res.data)]);
     } catch (e) { console.error(e); }
   };
   const updateOffer = async (id: string, o: Offer) => {
     try {
-      const res = await api.put(`/content/offers/${id}`, o);
-      setOffers(prev => prev.map(i => i.id === id ? mapId(res.data) : i));
+      const res = await api.put(`/offer/${id}`, o);
+      setOffers(offers.map(i => i.id === id ? mapId(res.data) : i));
     } catch (e) { console.error(e); }
   };
   const deleteOffer = async (id: string) => {
     try {
-      await api.delete(`/content/offers/${id}`);
-      setOffers(prev => prev.filter(i => i.id !== id));
+      await api.delete(`/offer/${id}`);
+      setOffers(offers.filter(i => i.id !== id));
     } catch (e) { console.error(e); }
   };
 
   const updateHeroContent = async (c: HeroContent) => {
     try {
-      const res = await api.post('/content/hero', c);
+      const res = await api.post('/hero', c);
       setHeroContent(mapId(res.data));
     } catch (e) { console.error(e); }
   };
@@ -316,7 +322,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const res = await api.post('/blog', p);
       const newPost = mapId(res.data);
-      setBlogPosts(prev => [newPost, ...prev]);
+      setBlogPosts([newPost, ...blogPosts]);
       return newPost;
     } catch (e) { 
       console.error(e); 
@@ -327,7 +333,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const res = await api.put(`/blog/${id}`, p);
       const updatedPost = mapId(res.data);
-      setBlogPosts(prev => prev.map(i => i.id === id ? updatedPost : i));
+      setBlogPosts(blogPosts.map(i => i.id === id ? updatedPost : i));
       return updatedPost;
     } catch (e) { 
       console.error(e); 
@@ -337,7 +343,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const deleteBlogPost = async (id: string) => {
     try {
       await api.delete(`/blog/${id}`);
-      setBlogPosts(prev => prev.filter(i => i.id !== id));
+      setBlogPosts(blogPosts.filter(i => i.id !== id));
     } catch (e) { console.error(e); }
   };
 
@@ -345,51 +351,49 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addMessage = async (m: ContactMessage) => {
     try {
         const res = await api.post('/contact', m);
-        // optionally append to messages if desired:
-        // setMessages(prev => [mapId(res.data), ...prev]);
     } catch (e) { console.error(e) }
   };
   const updateMessageStatus = async (id: string, status: 'new' | 'read' | 'resolved') => {
     try {
       const res = await api.put(`/contact/${id}`, { status });
-      setMessages(prev => prev.map(m => m.id === id ? mapId(res.data) : m));
+      setMessages(messages.map(m => m.id === id ? mapId(res.data) : m));
     } catch (e) { console.error(e); }
   };
   const deleteMessage = async (id: string) => {
     try {
       await api.delete(`/contact/${id}`);
-      setMessages(prev => prev.filter(m => m.id !== id));
+      setMessages(messages.filter(m => m.id !== id));
     } catch (e) { console.error(e); }
   };
 
   const addLead = async (l: Lead) => {
     try {
-        const res = await api.post('/leads', l);
-        setLeads(prev => [mapId(res.data), ...prev]);
+        const res = await api.post('/lead', l);
+        setLeads([mapId(res.data), ...leads]);
     } catch(e) { console.error(e) }
   };
   const updateLead = async (id: string, l: Lead) => {
     try {
-      const res = await api.put(`/leads/${id}`, l);
-      setLeads(prev => prev.map(i => i.id === id ? mapId(res.data) : i));
+      const res = await api.put(`/lead/${id}`, l);
+      setLeads(leads.map(i => i.id === id ? mapId(res.data) : i));
     } catch (e) { console.error(e); }
   };
   const deleteLead = async (id: string) => {
     try {
-      await api.delete(`/leads/${id}`);
-      setLeads(prev => prev.filter(i => i.id !== id));
+      await api.delete(`/lead/${id}`);
+      setLeads(leads.filter(i => i.id !== id));
     } catch (e) { console.error(e); }
   };
 
   const addSubscriber = async (email: string) => {
     try {
-      await api.post('/subscribers', { email });
+      await api.post('/subscriber', { email });
     } catch (e) { console.error(e); }
   };
   const deleteSubscriber = async (id: string) => {
     try {
-      await api.delete(`/subscribers/${id}`);
-      setSubscribers(prev => prev.filter(s => s.id !== id));
+      await api.delete(`/subscriber/${id}`);
+      setSubscribers(subscribers.filter(s => s.id !== id));
     } catch (e) { console.error(e); }
   };
 

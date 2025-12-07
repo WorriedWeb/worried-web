@@ -52,4 +52,4 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
-export const projectRoutes = router;
+export default router;

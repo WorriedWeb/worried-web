@@ -31,4 +31,4 @@ router.post('/login', async (req, res) => {
   }
 });
 
-export const authRoutes = router;
+export default router;
