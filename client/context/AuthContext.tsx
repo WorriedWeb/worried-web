@@ -42,6 +42,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    console.log('Logging out user');
     try {
       localStorage.removeItem('admin_token');
       localStorage.removeItem('admin_email');

@@ -37,6 +37,7 @@ export const AdminLogin: React.FC = () => {
       });
 
       if (res.data.token) {
+        console.log('Login successful:', res.data);
         login(res.data.token, res.data.email);
         toast.success('Welcome back!');
         navigate(from, { replace: true });
