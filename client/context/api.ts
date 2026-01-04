@@ -1,5 +1,5 @@
 // client/context/api.ts
-export const BACKEND = import.meta.env.VITE_BACKEND_URL || '';
+export const BACKEND = import.meta.env.VITE_BACKEND_URL || '127.0.0.1:5000';
 
 type Json = any;
 

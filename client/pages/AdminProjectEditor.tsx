@@ -103,7 +103,8 @@ export const AdminProjectEditor: React.FC = () => {
       }
       toast.success('Uploaded', { id: toastId });
     } catch (error) {
-      toast.error('Upload failed', { id: toastId });
+      console.error('Image upload failed', error);
+      toast.error(`Upload failed: ${error}`, { id: toastId });
     }
     
     e.target.value = '';
