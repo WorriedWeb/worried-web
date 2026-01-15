@@ -241,7 +241,7 @@ export const Home: React.FC = () => {
                   {service.description}
                 </p>
                 
-                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700 flex items-center text-primary font-semibold text-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700 flex items-center text-primary dark:text-gray-400 font-semibold text-sm opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                   Learn more <ArrowRight className="w-4 h-4 ml-2" />
                 </div>
               </MotionDiv>
