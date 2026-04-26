@@ -13,6 +13,7 @@ export const ProjectDetails: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { projects, offers } = useData();
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);;
 
   const project = projects.find(p => p.slug === slug);
   const activeOffer = offers.find(o => o.isActive);
@@ -122,12 +123,30 @@ export const ProjectDetails: React.FC = () => {
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {project.gallery.map((img, index) => (
                       <div key={index} className="aspect-video rounded-xl bg-gray-100 dark:bg-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                        <img src={img} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" alt={`${project.title} gallery ${index + 1}`} />
+                        <img 
+                          src={img} 
+                          onClick={() => setSelectedImage(img)}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer" 
+                          alt={`${project.title} gallery ${index + 1}`} 
+                        />
                       </div>
                     ))}
                  </div>
               </div>
             )}
+
+            {selectedImage && (
+  <div 
+    className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+    onClick={() => setSelectedImage(null)}
+  >
+    <img 
+  src={selectedImage}
+  onClick={(e) => e.stopPropagation()}
+  className="max-w-[90%] max-h-[90%] rounded-lg"
+/>
+  </div>
+)}
           </MotionDiv>
 
           {/* Sidebar (Right) */}
